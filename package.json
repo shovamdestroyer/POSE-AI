@@ -1,0 +1,19 @@
+{
+  "name": "posemate-ai",
+  "version": "1.0.0",
+  "description": "PoseMate AI - A Smart Photography Pose Assistant using HTML5, CSS3, and Vanilla JavaScript",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "photography",
+    "pose-assistant",
+    "vanilla-js",
+    "camera-api",
+    "mediapipe",
+    "mobile-first"
+  ],
+  "author": "PoseMate AI Team",
+  "license": "MIT"
+}

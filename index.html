@@ -1,0 +1,1557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>PoseMate AI — Smart Photography Pose Assistant & Studio</title>
+  <meta name="description" content="Never feel awkward in front of a camera again. PoseMate AI is your personal real-time photography pose coach with genuine photographic references, step-by-step choreography, and on-device privacy.">
+  <meta name="theme-color" content="#121316">
+
+  <!-- Google Fonts: Playfair Display, Outfit & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- MediaPipe Pose standalone CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.4.1675466862/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1675469404/pose.js" crossorigin="anonymous"></script>
+</head>
+<body class="theme-dark">
+
+  <!-- Top App Navigation -->
+  <header class="app-nav" id="appNav">
+    <div class="nav-container">
+      <div class="brand-group" id="navBrand" tabindex="0" role="button" aria-label="PoseMate AI Home">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+            <circle cx="12" cy="13" r="4"></circle>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">PoseMate<span class="brand-accent">AI</span></span>
+          <span class="brand-badge">Studio</span>
+        </div>
+      </div>
+
+      <!-- Center Desktop Navigation Links -->
+      <nav class="nav-links-desktop" aria-label="Main Navigation">
+        <button type="button" class="nav-link active" id="navLinkHome">Home</button>
+        <button type="button" class="nav-link" id="navLinkExplore">Explore Poses</button>
+        <button type="button" class="nav-link" id="navLinkStudio">Camera Studio</button>
+        <button type="button" class="nav-link" id="navLinkFavorites">Favorites</button>
+        <button type="button" class="nav-link" id="navLinkGallery">Gallery</button>
+      </nav>
+
+      <div class="nav-actions">
+        <!-- Theme Toggle (Light / Dark) -->
+        <button type="button" class="icon-toggle-btn" id="themeToggleBtn" title="Toggle Light / Dark Theme" aria-label="Toggle Theme">
+          <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+          <svg class="theme-icon-light hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </button>
+
+        <!-- Saved Favorites Quick Trigger -->
+        <button type="button" class="icon-toggle-btn fav-nav-btn" id="openFavoritesNavBtn" title="View Saved Favorites" aria-label="Saved Favorites">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          </svg>
+          <span class="badge-count" id="navFavoritesCount">0</span>
+        </button>
+
+        <!-- Pose Library Catalog Button -->
+        <button type="button" class="nav-btn ghost-btn" id="openCatalogNavBtn" aria-label="Browse Pose Library">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span class="btn-text-desktop">Pose Library</span>
+        </button>
+
+        <!-- Start Posing Camera Launch Button -->
+        <button type="button" class="nav-btn primary-nav-btn" id="navStartPosingBtn">
+          <span>Start Posing</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+
+        <!-- Authentication Container: Logged Out Button -->
+        <button type="button" class="nav-btn auth-nav-btn" id="openAuthNavBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span class="auth-btn-text">Sign In</span>
+        </button>
+
+        <!-- User Profile Dropdown (Logged In State) -->
+        <div class="user-profile-menu hidden" id="userProfileMenu">
+          <button type="button" class="profile-trigger-btn" id="userProfileTrigger" aria-expanded="false" aria-haspopup="true">
+            <span class="avatar-circle" id="userAvatarInitials">AU</span>
+            <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+
+          <div class="profile-dropdown-card hidden" id="userProfileDropdown">
+            <div class="dropdown-user-header">
+              <span class="dropdown-name" id="userProfileName">Alex Vance</span>
+              <span class="dropdown-email" id="userProfileEmail">alex@example.com</span>
+              <span class="dropdown-badge">Studio Member</span>
+            </div>
+            <div class="dropdown-divider"></div>
+            <button type="button" class="dropdown-item" id="profileFavoritesItem">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+              </svg>
+              <span>Saved Poses</span>
+            </button>
+            <button type="button" class="dropdown-item" id="profileStudioItem">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                <circle cx="12" cy="13" r="4"></circle>
+              </svg>
+              <span>Launch Studio</span>
+            </button>
+            <button type="button" class="dropdown-item" id="profileFirebaseItem">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              </svg>
+              <span>Firebase Auth Guide</span>
+            </button>
+            <div class="dropdown-divider"></div>
+            <button type="button" class="dropdown-item logout-item" id="logoutBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              <span>Log Out</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ======================================================== -->
+  <!-- VIEW 1: HOME / LANDING SCREEN                           -->
+  <!-- ======================================================== -->
+  <main id="homeView" class="view-section active">
+    
+    <!-- Hero Banner (Photography Studio Inspired) -->
+    <section class="hero-section">
+      <div class="hero-glow"></div>
+      <div class="container hero-content">
+        
+        <div class="hero-badge">
+          <span class="badge-dot"></span>
+          <span>Editorial Precision • On-Device AI • Studio Quality</span>
+        </div>
+
+        <h1 class="hero-title">
+          Find Your <span class="serif-accent">Perfect Pose.</span>
+        </h1>
+
+        <p class="hero-subtitle">
+          Your personal AI photography and posing companion. Master natural angles, candid posture, and effortless confidence with real photographic references and live camera guidance.
+        </p>
+
+        <div class="hero-cta-group">
+          <button type="button" class="btn btn-primary btn-large glow-effect" id="heroStartPosingBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+              <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+            <span>Start Posing</span>
+          </button>
+
+          <button type="button" class="btn btn-secondary btn-large" id="heroExplorePosesBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            <span>Explore 18+ Poses</span>
+          </button>
+
+          <button type="button" class="btn btn-ghost btn-large" id="heroFavoritesBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+            <span>Saved Poses</span>
+          </button>
+        </div>
+
+        <!-- Hero Studio Visual Banner with Real Photography Reference -->
+        <div class="hero-visual-frame">
+          <div class="hero-image-wrapper">
+            <img class="hero-photo" src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1200&q=80" alt="Professional studio photographer and pose choreography" onerror="this.style.display='none'" />
+            <div class="hero-photo-overlay"></div>
+            <div class="hero-floating-card top-left">
+              <span class="card-icon">📐</span>
+              <div>
+                <strong>Golden Ratio Posture</strong>
+                <p>Natural S-Curve & Symmetrical Depth</p>
+              </div>
+            </div>
+            <div class="hero-floating-card bottom-right">
+              <span class="card-icon">⚡</span>
+              <div>
+                <strong>Live On-Device Feedback</strong>
+                <p>Instant shoulder & distance telemetry</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="privacy-guarantee">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <span>100% Private & Secure: Live camera telemetry processed on-device. No images stored without permission.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Curated Pose Collections (Solo, Couple, Group Categories) -->
+    <section class="categories-section" id="categoriesSection">
+      <div class="container">
+        <div class="section-title-row">
+          <div>
+            <span class="section-kicker">Curated Collections</span>
+            <h2 class="section-title">Explore by Photography Mode</h2>
+            <p class="section-subtitle">Choreographed poses for self-portraits, romantic chemistry, and group symmetry.</p>
+          </div>
+        </div>
+
+        <div class="category-cards-grid">
+          <!-- Solo Category Card -->
+          <div class="category-showcase-card" data-category="solo">
+            <div class="category-image-wrap">
+              <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=600&q=80" alt="Solo Photography Poses" loading="lazy" />
+              <span class="category-count-badge">7 Curated Poses</span>
+            </div>
+            <div class="category-body">
+              <h3 class="category-title">Solo Portraits</h3>
+              <p class="category-desc">Effortless weight shifts, streetwear strides, hand placement in pockets, and wall leans that flatter your lines.</p>
+              <button type="button" class="category-action-btn" data-mode="solo">
+                <span>View Solo Poses</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Couple Category Card -->
+          <div class="category-showcase-card" data-category="couple">
+            <div class="category-image-wrap">
+              <img src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=600&q=80" alt="Couple Photography Poses" loading="lazy" />
+              <span class="category-count-badge">6 Curated Poses</span>
+            </div>
+            <div class="category-body">
+              <h3 class="category-title">Couple Harmony</h3>
+              <p class="category-desc">Natural romance, side-by-side alignment, gentle forehead leans, hand-in-hand strolls, and candid laughter.</p>
+              <button type="button" class="category-action-btn" data-mode="couple">
+                <span>View Couple Poses</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Group Category Card -->
+          <div class="category-showcase-card" data-category="group">
+            <div class="category-image-wrap">
+              <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=600&q=80" alt="Group Photography Poses" loading="lazy" />
+              <span class="category-count-badge">5 Curated Poses</span>
+            </div>
+            <div class="category-body">
+              <h3 class="category-title">Group Symmetry</h3>
+              <p class="category-desc">Friends triangle huddles, staggered campus stairs, multi-tiered family portraits, and celebratory wedding arcs.</p>
+              <button type="button" class="category-action-btn" data-mode="group">
+                <span>View Group Poses</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Search & Filter Bar Section -->
+    <section class="search-section" id="poseSearchSection">
+      <div class="container">
+        <div class="search-bar-card">
+          <div class="search-input-wrap">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="poseSearchInput" class="pose-search-input" placeholder="Search poses by keyword, vibe, framing, or angle (e.g. sitting, candid, walking)..." />
+            <button type="button" class="clear-search-btn hidden" id="clearSearchBtn" aria-label="Clear Search">&times;</button>
+          </div>
+
+          <div class="search-filter-pills" id="searchFilterTabs">
+            <button type="button" class="filter-pill active" data-filter="all">All Modes</button>
+            <button type="button" class="filter-pill" data-filter="solo">Solo</button>
+            <button type="button" class="filter-pill" data-filter="couple">Couple</button>
+            <button type="button" class="filter-pill" data-filter="group">Group</button>
+          </div>
+        </div>
+        <div class="search-meta-row">
+          <span class="results-count-text" id="searchResultsCount">Showing all 18 curated poses</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Posing Configuration Form / Selector Section (Preserved & Enhanced) -->
+    <section class="config-section">
+      <div class="container">
+        
+        <!-- Step 1: Mode Selection -->
+        <div class="config-block">
+          <div class="block-header">
+            <div class="block-step">1</div>
+            <div>
+              <h2 class="block-title">Choose Your Photography Mode</h2>
+              <p class="block-desc">Who are you capturing today?</p>
+            </div>
+          </div>
+
+          <div class="modes-grid" id="modeSelector">
+            <!-- Solo Card -->
+            <div class="mode-card active" data-mode="solo" tabindex="0" role="button" aria-pressed="true">
+              <div class="mode-icon-circle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </div>
+              <div class="mode-info">
+                <h3 class="mode-name">Solo</h3>
+                <p class="mode-detail">Natural self-portraits, streetwear strides, headshots & candid angles.</p>
+                <span class="mode-tag">7 Curated Poses</span>
+              </div>
+              <div class="card-radio-indicator"></div>
+            </div>
+
+            <!-- Couple Card -->
+            <div class="mode-card" data-mode="couple" tabindex="0" role="button" aria-pressed="false">
+              <div class="mode-icon-circle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+              </div>
+              <div class="mode-info">
+                <h3 class="mode-name">Couple</h3>
+                <p class="mode-detail">Natural romance, side-by-side harmony, candid laughs & walking together.</p>
+                <span class="mode-tag">6 Curated Poses</span>
+              </div>
+              <div class="card-radio-indicator"></div>
+            </div>
+
+            <!-- Group Card -->
+            <div class="mode-card" data-mode="group" tabindex="0" role="button" aria-pressed="false">
+              <div class="mode-icon-circle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M7 21v-2a4 4 0 0 1 3-3.87"></path>
+                  <path d="M9 3.13a4 4 0 0 1 6 0"></path>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M1 21v-2a4 4 0 0 1 3-3.87"></path>
+                  <circle cx="12" cy="7" r="3"></circle>
+                  <circle cx="5" cy="8" r="3"></circle>
+                  <circle cx="19" cy="8" r="3"></circle>
+                </svg>
+              </div>
+              <div class="mode-info">
+                <h3 class="mode-name">Group</h3>
+                <p class="mode-detail">Friends triangles, college tiered campus steps, wedding arcs & family portraits.</p>
+                <span class="mode-tag">5 Curated Poses</span>
+              </div>
+              <div class="card-radio-indicator"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Outfit Selection -->
+        <div class="config-block">
+          <div class="block-header">
+            <div class="block-step">2</div>
+            <div>
+              <h2 class="block-title">Select What You're Wearing</h2>
+              <p class="block-desc">Poses tailored to complement your clothes and fabric lines</p>
+            </div>
+          </div>
+
+          <div class="chips-container" id="outfitSelector" role="radiogroup" aria-label="Outfit Selection">
+            <button type="button" class="chip active" data-outfit="casual" role="radio" aria-checked="true">
+              <span class="chip-icon">👟</span>
+              <span class="chip-label">Casual</span>
+              <span class="chip-sub">Tees, hoodies, jeans</span>
+            </button>
+
+            <button type="button" class="chip" data-outfit="formal" role="radio" aria-checked="false">
+              <span class="chip-icon">👔</span>
+              <span class="chip-label">Formal</span>
+              <span class="chip-sub">Blazers, suits, trousers</span>
+            </button>
+
+            <button type="button" class="chip" data-outfit="traditional" role="radio" aria-checked="false">
+              <span class="chip-icon">✨</span>
+              <span class="chip-label">Traditional</span>
+              <span class="chip-sub">Ethnic, sarees, kurtas</span>
+            </button>
+
+            <button type="button" class="chip" data-outfit="western" role="radio" aria-checked="false">
+              <span class="chip-icon">🧥</span>
+              <span class="chip-label">Western</span>
+              <span class="chip-sub">Dresses, jackets, chic</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 3: Photography Style Selection -->
+        <div class="config-block">
+          <div class="block-header">
+            <div class="block-step">3</div>
+            <div>
+              <h2 class="block-title">Select Photography Style</h2>
+              <p class="block-desc">Set the mood and aesthetic for your photo shoot</p>
+            </div>
+          </div>
+
+          <div class="chips-container" id="styleSelector" role="radiogroup" aria-label="Photography Style Selection">
+            <button type="button" class="chip active" data-style="instagram" role="radio" aria-checked="true">
+              <span class="chip-icon">📸</span>
+              <span class="chip-label">Instagram</span>
+            </button>
+
+            <button type="button" class="chip" data-style="wedding" role="radio" aria-checked="false">
+              <span class="chip-icon">💍</span>
+              <span class="chip-label">Wedding</span>
+            </button>
+
+            <button type="button" class="chip" data-style="college" role="radio" aria-checked="false">
+              <span class="chip-icon">🎓</span>
+              <span class="chip-label">College</span>
+            </button>
+
+            <button type="button" class="chip" data-style="birthday" role="radio" aria-checked="false">
+              <span class="chip-icon">🎉</span>
+              <span class="chip-label">Birthday</span>
+            </button>
+
+            <button type="button" class="chip" data-style="travel" role="radio" aria-checked="false">
+              <span class="chip-icon">✈️</span>
+              <span class="chip-label">Travel</span>
+            </button>
+
+            <button type="button" class="chip" data-style="professional" role="radio" aria-checked="false">
+              <span class="chip-icon">💼</span>
+              <span class="chip-label">Professional</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Summary & Launch Action -->
+        <div class="launch-summary-card">
+          <div class="summary-details">
+            <span class="summary-label">Selected Configuration:</span>
+            <div class="summary-tags" id="selectionSummaryTags">
+              <span class="tag-pill" id="summaryModeTag">Mode: Solo</span>
+              <span class="tag-pill" id="summaryOutfitTag">Outfit: Casual</span>
+              <span class="tag-pill" id="summaryStyleTag">Style: Instagram</span>
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary btn-large glow-effect" id="launchCameraBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+              <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+            <span>Open Camera & Pose Coach</span>
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Recommended Poses Preview Shelf with Actual Photographic Thumbnails -->
+    <section class="shelf-section">
+      <div class="container">
+        <div class="section-title-row">
+          <div>
+            <span class="section-kicker">Pose Choreography</span>
+            <h2 class="section-title">Recommended Poses For Your Setup</h2>
+            <p class="section-subtitle">Real photographic references. Click any pose to launch live camera guidance.</p>
+          </div>
+          <button type="button" class="text-link-btn" id="viewAllPosesBtn">View All 18 Poses &rarr;</button>
+        </div>
+
+        <div class="poses-carousel-track" id="recommendedPosesTrack">
+          <!-- Dynamically populated by script.js with real photos -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Saved Favorites Section -->
+    <section class="shelf-section favorites-section-block" id="favoritesSection">
+      <div class="container">
+        <div class="section-title-row">
+          <div>
+            <span class="section-kicker">Your Collection</span>
+            <h2 class="section-title">Saved Favorite Poses</h2>
+            <p class="section-subtitle">Your personal bookmarked poses for quick recall during photoshoots.</p>
+          </div>
+        </div>
+
+        <div class="favorites-grid" id="favoritesGrid">
+          <!-- Dynamically populated or empty state -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Editorial Inspiration Photo Gallery Section -->
+    <section class="gallery-section" id="gallerySection">
+      <div class="container">
+        <div class="section-title-row">
+          <div>
+            <span class="section-kicker">Studio Portfolio</span>
+            <h2 class="section-title">Editorial Inspiration Gallery</h2>
+            <p class="section-subtitle">Explore genuine final photographs achieved using PoseMate choreography.</p>
+          </div>
+          <div class="gallery-filter-tabs" id="galleryModeTabs">
+            <button type="button" class="filter-tab active" data-gallery-mode="all">All</button>
+            <button type="button" class="filter-tab" data-gallery-mode="solo">Solo</button>
+            <button type="button" class="filter-tab" data-gallery-mode="couple">Couple</button>
+            <button type="button" class="filter-tab" data-gallery-mode="group">Group</button>
+          </div>
+        </div>
+
+        <div class="gallery-grid" id="galleryGrid">
+          <!-- Dynamically populated by script.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Premium Photography Footer -->
+    <footer class="app-footer">
+      <div class="container footer-content">
+        <div class="footer-brand-col">
+          <div class="brand-group">
+            <div class="brand-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                <circle cx="12" cy="13" r="4"></circle>
+              </svg>
+            </div>
+            <span class="brand-title">PoseMate<span class="brand-accent">AI</span></span>
+          </div>
+          <p class="footer-desc">
+            Your personal photography pose coach. Combining computer vision, editorial choreography, and on-device privacy for effortless photographs.
+          </p>
+        </div>
+
+        <div class="footer-links-col">
+          <h4 class="footer-heading">Modes</h4>
+          <ul>
+            <li><a href="#modeSelector" class="footer-link">Solo Portraits</a></li>
+            <li><a href="#modeSelector" class="footer-link">Couple Photography</a></li>
+            <li><a href="#modeSelector" class="footer-link">Group Arrangements</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-links-col">
+          <h4 class="footer-heading">Features</h4>
+          <ul>
+            <li><a href="#poseSearchSection" class="footer-link">Pose Search & Filter</a></li>
+            <li><a href="#favoritesSection" class="footer-link">Saved Favorites</a></li>
+            <li><a href="#gallerySection" class="footer-link">Editorial Gallery</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-links-col">
+          <h4 class="footer-heading">Account & Setup</h4>
+          <ul>
+            <li><button type="button" class="footer-text-btn" id="footerOpenAuthBtn">Studio Login</button></li>
+            <li><button type="button" class="footer-text-btn" id="footerOpenFirebaseBtn">Firebase Auth Guide</button></li>
+            <li><span class="footer-privacy-text">100% Private On-Device</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom-bar">
+        <div class="container footer-bottom-inner">
+          <p>&copy; 2026 PoseMate AI Studio. Crafted for modern photography lovers.</p>
+          <p class="footer-subtext">Images provided via verified high-resolution photography archives.</p>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+
+  <!-- ======================================================== -->
+  <!-- VIEW 2: CAMERA & STEP-BY-STEP POSE COACH STUDIO          -->
+  <!-- ======================================================== -->
+  <main id="studioView" class="view-section">
+    <!-- Studio Header / Top Utility Bar -->
+    <div class="studio-header">
+      <button type="button" class="studio-btn" id="exitStudioBtn" title="Back to Setup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        <span>Exit</span>
+      </button>
+
+      <!-- Studio Mode Switcher (Solo / Couple / Group) -->
+      <div class="studio-mode-switcher" id="studioModeSwitcher" role="radiogroup" aria-label="Photography Mode">
+        <button type="button" class="studio-mode-pill active" data-studio-mode="solo" role="radio" aria-checked="true">Solo</button>
+        <button type="button" class="studio-mode-pill" data-studio-mode="couple" role="radio" aria-checked="false">Couple</button>
+        <button type="button" class="studio-mode-pill" data-studio-mode="group" role="radio" aria-checked="false">Group</button>
+      </div>
+
+      <!-- Pose Cycle Buttons in Top Bar -->
+      <div class="studio-pose-quicknav">
+        <button type="button" class="studio-icon-btn" id="studioPrevPoseBtn" title="Previous Pose" aria-label="Previous Pose">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <div class="studio-badge-group">
+          <span class="studio-pill" id="studioModeBadge">Solo</span>
+          <span class="studio-pill pill-subtle" id="studioStyleBadge">Instagram</span>
+        </div>
+        <button type="button" class="studio-icon-btn" id="studioNextPoseBtn" title="Next Pose" aria-label="Next Pose">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Quick Utility Toggles -->
+      <div class="studio-controls-right">
+        <!-- Bookmark / Favorite Pose Button -->
+        <button type="button" class="studio-icon-btn" id="studioFavoriteBtn" title="Save Pose to Favorites" aria-label="Save to Favorites">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          </svg>
+        </button>
+
+        <!-- Camera facing switch button -->
+        <button type="button" class="studio-icon-btn" id="flipCameraBtn" title="Switch Front / Rear Camera" aria-label="Switch Camera">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 16v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="4 20 8 16 12 20"></polyline>
+            <path d="M4 8V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"></path>
+            <polyline points="20 4 16 8 12 4"></polyline>
+          </svg>
+        </button>
+
+        <!-- Skeleton overlay toggle -->
+        <button type="button" class="studio-icon-btn active" id="toggleSkeletonBtn" title="Toggle AI Skeleton Overlay" aria-label="Toggle Skeleton">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="5" r="2"></circle>
+            <line x1="12" y1="7" x2="12" y2="15"></line>
+            <line x1="8" y1="10" x2="16" y2="10"></line>
+            <line x1="12" y1="15" x2="9" y2="21"></line>
+            <line x1="12" y1="15" x2="15" y2="21"></line>
+          </svg>
+        </button>
+
+        <!-- Ghost silhouette overlay toggle -->
+        <button type="button" class="studio-icon-btn active" id="toggleGhostBtn" title="Toggle Target Pose Silhouette Overlay" aria-label="Toggle Ghost Silhouette">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </button>
+
+        <!-- Grid lines toggle -->
+        <button type="button" class="studio-icon-btn" id="toggleGridBtn" title="Toggle Rule of Thirds Grid" aria-label="Toggle Grid">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="8" y1="3" x2="8" y2="21"></line>
+            <line x1="16" y1="3" x2="16" y2="21"></line>
+            <line x1="3" y1="8" x2="21" y2="8"></line>
+            <line x1="3" y1="16" x2="21" y2="16"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Studio Split Layout (Side-by-side on desktop, vertical on mobile) -->
+    <div class="studio-workspace">
+      
+      <!-- ============================================== -->
+      <!-- LEFT / TOP COLUMN: LIVE CAMERA VIEWFINDER      -->
+      <!-- ============================================== -->
+      <div class="viewfinder-column">
+        <div class="viewfinder-container" id="viewfinderContainer">
+          
+          <!-- Live Camera Video Feed -->
+          <video id="cameraVideo" class="camera-feed" autoplay playsinline muted></video>
+
+          <!-- AI Pose Landmark Canvas -->
+          <canvas id="poseCanvas" class="pose-canvas"></canvas>
+
+          <!-- Ghost Silhouette Overlay SVG (Guidance wireframe) -->
+          <div id="ghostSilhouetteOverlay" class="ghost-silhouette-overlay">
+            <!-- Injected dynamically per current pose -->
+          </div>
+
+          <!-- Rule-of-Thirds Grid Overlay -->
+          <div id="ruleOfThirdsGrid" class="rule-grid hidden">
+            <div class="grid-line vertical line-1"></div>
+            <div class="grid-line vertical line-2"></div>
+            <div class="grid-line horizontal line-1"></div>
+            <div class="grid-line horizontal line-2"></div>
+          </div>
+
+          <!-- Shutter Flash Effect Screen -->
+          <div id="shutterFlash" class="shutter-flash"></div>
+
+          <!-- Countdown Overlay Timer (3, 2, 1) -->
+          <div id="countdownOverlay" class="countdown-overlay hidden">
+            <div class="countdown-circle">
+              <span id="countdownNumber">3</span>
+            </div>
+            <span class="countdown-subtext">Hold your pose steady!</span>
+          </div>
+
+          <!-- Real-Time Posture Feedback Banner -->
+          <div id="liveFeedbackPill" class="feedback-pill info">
+            <span class="feedback-icon" id="feedbackIcon">💡</span>
+            <span class="feedback-text" id="feedbackText">Aligning with camera...</span>
+          </div>
+
+          <!-- AI Estimation Status Badge (Graceful degradation notifier) -->
+          <div id="aiStatusBadge" class="ai-status-badge ready">
+            <span class="ai-status-dot"></span>
+            <span id="aiStatusText">AI Pose Tracking Active</span>
+          </div>
+
+          <!-- Multi-Camera Device Selector Dropdown -->
+          <div class="camera-select-wrapper">
+            <select id="cameraDeviceSelect" class="camera-dropdown" aria-label="Select Camera Device">
+              <option value="">Detecting cameras...</option>
+            </select>
+          </div>
+
+          <!-- Bottom Camera Action Dock (Capture, Timer, AI Scene Analysis) -->
+          <div class="viewfinder-action-dock">
+            <!-- Timer selection button (0s / 3s) -->
+            <button type="button" class="dock-btn" id="timerToggleBtn" title="Capture Timer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              <span id="timerLabel">3s</span>
+            </button>
+
+            <!-- Main Photo Capture Button -->
+            <button type="button" class="shutter-button glow-shutter" id="shutterBtn" aria-label="Take Photo">
+              <div class="shutter-inner">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="12" cy="12" r="7"></circle>
+                </svg>
+              </div>
+            </button>
+
+            <!-- AI Outfit & Scene Analyzer trigger button -->
+            <button type="button" class="dock-btn ai-dock-btn" id="analyzeOutfitSceneBtn" title="AI Outfit & Scene Analyzer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+              </svg>
+              <span>AI Fit</span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- RIGHT / BOTTOM COLUMN: STEP-BY-STEP POSE COACH -->
+      <!-- ============================================== -->
+      <div class="coach-column">
+        
+        <!-- Active Pose Header Card with Prev / Next Buttons -->
+        <div class="pose-meta-card">
+          <div class="meta-row">
+            <div>
+              <div class="meta-tags">
+                <span class="badge-pill badge-primary" id="coachPoseCategory">Standing</span>
+                <span class="badge-pill badge-outline" id="coachPoseDifficulty">Beginner</span>
+                <span class="badge-pill badge-outline" id="coachPoseFraming">Full Body</span>
+              </div>
+              <h2 class="current-pose-name" id="coachPoseName">Natural Standing</h2>
+              <p class="current-pose-vibe" id="coachPoseVibe">Effortless & Relaxed</p>
+            </div>
+
+            <div class="meta-pose-nav-buttons">
+              <button type="button" class="btn btn-secondary btn-icon-round" id="coachPrevPoseBtn" title="Previous Pose" aria-label="Previous Pose">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              </button>
+              <button type="button" class="btn btn-secondary btn-icon-round" id="coachNextPoseBtn" title="Next Pose" aria-label="Next Pose">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm" id="switchPoseBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="14" width="7" height="7"></rect>
+                  <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+                <span>Library</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Real Photographic Reference Card (Reference Pose vs Final Result) -->
+        <div class="coach-photo-reference-card" id="coachPhotoCard">
+          <div class="photo-tab-header">
+            <span class="photo-tab-title">Visual Photography Guide:</span>
+            <div class="photo-switch-tabs">
+              <button type="button" class="photo-switch-tab active" id="photoTabReferenceBtn">
+                <span>Reference Pose</span>
+              </button>
+              <button type="button" class="photo-switch-tab" id="photoTabFinalBtn">
+                <span>Final Look</span>
+              </button>
+            </div>
+            <button type="button" class="expand-photo-btn" id="expandPhotoBtn" title="Expand Photo Reference" aria-label="Expand Photo">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <polyline points="9 21 3 21 3 15"></polyline>
+                <line x1="21" y1="3" x2="14" y2="10"></line>
+                <line x1="3" y1="21" x2="10" y2="14"></line>
+              </svg>
+            </button>
+          </div>
+
+          <div class="photo-display-container">
+            <!-- Reference Pose Image -->
+            <div class="photo-frame" id="refPhotoFrame">
+              <img id="coachRefPhotoImg" class="coach-reference-img" src="" alt="Pose Reference Photograph" />
+              <div class="photo-caption-pill">
+                <span>Pose Reference: Emulate this posture</span>
+              </div>
+            </div>
+            <!-- Final Shot Image (Toggled) -->
+            <div class="photo-frame hidden" id="finalPhotoFrame">
+              <img id="coachFinalPhotoImg" class="coach-reference-img" src="" alt="Finished Photograph Result" />
+              <div class="photo-caption-pill final-pill">
+                <span>Final Look: Expected finished photograph</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step-by-Step Guidance Interactive Card -->
+        <div class="step-guide-card">
+          
+          <!-- Step Progress Indicators & Continuous Progress Bar -->
+          <div class="step-progress-header">
+            <div class="step-counter-text">
+              <span class="step-counter-label">Choreography:</span>
+              <strong id="stepCounterDisplay">Step 1 of 5</strong>
+            </div>
+            <div class="step-progress-bar-track">
+              <div class="step-progress-bar-fill" id="stepProgressBarFill" style="width: 20%;"></div>
+            </div>
+            <div class="step-dots-row" id="stepDotsContainer">
+              <!-- Dynamically populated step dots -->
+            </div>
+          </div>
+
+          <!-- Step Content Body -->
+          <div class="step-content-body">
+            <div class="step-header-row">
+              <span class="body-part-chip" id="stepBodyPartBadge">Feet & Stance</span>
+              <h3 class="step-title" id="stepTitleText">Feet Placement</h3>
+            </div>
+
+            <p class="step-instruction" id="stepInstructionText">
+              Stand with your feet shoulder-width apart. Point one foot slightly forward and angled outward.
+            </p>
+
+            <!-- Shy-friendly Advice Callout -->
+            <div class="shy-advice-box">
+              <div class="shy-icon">🌸</div>
+              <div class="shy-text-wrap">
+                <span class="shy-title">Shy-Friendly Tip</span>
+                <p class="shy-desc" id="stepShyTipText">
+                  Don't lock your knees! Keep a soft micro-bend so you feel anchored, not stiff.
+                </p>
+              </div>
+            </div>
+
+            <!-- Mini Visual Pose Reference -->
+            <div class="step-visual-preview" id="stepVisualBox">
+              <!-- SVG Silhouette thumbnail injected here -->
+            </div>
+          </div>
+
+          <!-- Real-Time Interactive Pose Coaching Bar -->
+          <div class="step-live-meter-card" id="stepLiveMeterCard">
+            <div class="meter-info-row">
+              <span class="meter-status-badge" id="stepMatchStatusBadge">
+                <span class="pulse-dot"></span>
+                <span id="stepMatchStatusText">Adjusting posture...</span>
+              </span>
+              <span class="meter-score-text" id="stepMatchPctText">0% Match</span>
+            </div>
+            <div class="meter-track" title="Hold steady for 1 second to complete step">
+              <div class="meter-fill" id="stepMatchProgressFill" style="width: 0%;"></div>
+            </div>
+            
+            <div class="guidance-controls-row">
+              <button type="button" class="coach-control-btn active" id="autoCaptureToggleBtn" title="Toggle Auto-Capture">
+                <span class="auto-indicator-dot"></span>
+                <span id="autoCaptureLabel">Auto-Capture: ON</span>
+              </button>
+              <button type="button" class="coach-control-btn" id="pauseGuidanceBtn" title="Pause / Resume Live Pose Guidance">
+                <span id="pauseGuidanceLabel">⏸ Pause</span>
+              </button>
+              <button type="button" class="coach-control-btn" id="restartGuidanceBtn" title="Restart Pose from Step 1">
+                <span>↺ Restart</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Step Navigation Buttons -->
+          <div class="step-nav-actions">
+            <button type="button" class="btn btn-secondary step-btn" id="prevStepBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+              <span>Previous Step</span>
+            </button>
+
+            <button type="button" class="btn btn-primary step-btn" id="nextStepBtn">
+              <span>Next Step</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Master Photography Pro-Tips Card (Posture, Lighting, Framing, Expression) -->
+        <div class="pro-tips-card" id="coachProTipsCard">
+          <div class="pro-tips-header">
+            <span class="pro-tips-title">💡 Photography Master Tips</span>
+          </div>
+          <div class="pro-tips-grid">
+            <div class="tip-box">
+              <span class="tip-label">🧍 Posture</span>
+              <p class="tip-text" id="proTipPostureText">Drop shoulders and engage core naturally.</p>
+            </div>
+            <div class="tip-box">
+              <span class="tip-label">💡 Lighting</span>
+              <p class="tip-text" id="proTipLightingText">Angle 45° towards natural window light.</p>
+            </div>
+            <div class="tip-box">
+              <span class="tip-label">📐 Framing</span>
+              <p class="tip-text" id="proTipFramingText">Leave 15% headroom above crown.</p>
+            </div>
+            <div class="tip-box">
+              <span class="tip-label">😊 Expression</span>
+              <p class="tip-text" id="proTipExpressionText">Part lips gently to relax jawline.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Real-Time Posture Alignment Telemetry -->
+        <div class="telemetry-card">
+          <div class="telemetry-header">
+            <span class="telemetry-title">Live Posture Telemetry</span>
+            <span class="telemetry-score" id="telemetryScoreBadge">95% Match</span>
+          </div>
+
+          <div class="telemetry-grid">
+            <div class="telemetry-item">
+              <span class="telem-label">Shoulder Level</span>
+              <div class="telem-bar-bg">
+                <div class="telem-bar-fill" id="shoulderBar" style="width: 90%;"></div>
+              </div>
+              <span class="telem-status" id="shoulderStatus">Balanced</span>
+            </div>
+
+            <div class="telemetry-item">
+              <span class="telem-label">Frame Centering</span>
+              <div class="telem-bar-bg">
+                <div class="telem-bar-fill" id="centerBar" style="width: 85%;"></div>
+              </div>
+              <span class="telem-status" id="centerStatus">Centered</span>
+            </div>
+
+            <div class="telemetry-item">
+              <span class="telem-label">Distance Framing</span>
+              <div class="telem-bar-bg">
+                <div class="telem-bar-fill" id="distanceBar" style="width: 92%;"></div>
+              </div>
+              <span class="telem-status" id="distanceStatus">Optimal</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Switch Similar Poses Strip -->
+        <div class="similar-poses-strip">
+          <h4 class="strip-title">More Poses in this Mode</h4>
+          <div class="strip-items-row" id="similarPosesRow">
+            <!-- Injected by script -->
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ======================================================== -->
+  <!-- MODAL 1: PHOTO CAPTURE PREVIEW & SAVE                    -->
+  <!-- ======================================================== -->
+  <div class="modal-overlay hidden" id="photoReviewModal" role="dialog" aria-modal="true" aria-labelledby="reviewTitle">
+    <div class="modal-card review-modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="reviewTitle">📸 Photo Captured!</h3>
+        <button type="button" class="modal-close-btn" id="closeReviewModalBtn" aria-label="Close Preview">&times;</button>
+      </div>
+
+      <div class="photo-preview-wrapper">
+        <img id="photoPreviewImg" class="photo-preview-img" alt="Captured photo preview" src="" />
+        <div class="photo-watermark">
+          <span>PoseMate AI</span>
+          <span id="photoPoseWatermark">Natural Standing</span>
+        </div>
+      </div>
+
+      <div class="photo-actions-row">
+        <button type="button" class="btn btn-secondary btn-large" id="retakePhotoBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+          </svg>
+          <span>Retake Photo</span>
+        </button>
+
+        <button type="button" class="btn btn-primary btn-large glow-effect" id="savePhotoBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span>Save / Download</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ======================================================== -->
+  <!-- MODAL 2: FULL POSE CATALOG & SELECTOR                    -->
+  <!-- ======================================================== -->
+  <div class="modal-overlay hidden" id="poseCatalogModal" role="dialog" aria-modal="true" aria-labelledby="catalogTitle">
+    <div class="modal-card catalog-modal-card">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title" id="catalogTitle">Explore Pose Library</h3>
+          <p class="modal-desc">Browse real photography examples with step-by-step cues</p>
+        </div>
+        <button type="button" class="modal-close-btn" id="closeCatalogModalBtn" aria-label="Close Catalog">&times;</button>
+      </div>
+
+      <!-- Filter Controls in Catalog -->
+      <div class="catalog-filters">
+        <div class="filter-group">
+          <span class="filter-label">Mode:</span>
+          <div class="filter-tabs" id="catalogModeTabs">
+            <button type="button" class="filter-tab active" data-mode="all">All (18)</button>
+            <button type="button" class="filter-tab" data-mode="solo">Solo (7)</button>
+            <button type="button" class="filter-tab" data-mode="couple">Couple (6)</button>
+            <button type="button" class="filter-tab" data-mode="group">Group (5)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Catalog Grid with Real Photographic Cards -->
+      <div class="catalog-grid" id="catalogGrid">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ======================================================== -->
+  <!-- MODAL 3: CAMERA ERROR & PERMISSION TROUBLESHOOTING       -->
+  <!-- ======================================================== -->
+  <div class="modal-overlay hidden" id="cameraErrorModal" role="dialog" aria-modal="true" aria-labelledby="cameraErrorTitle">
+    <div class="modal-card error-modal-card">
+      <div class="error-icon-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2.5">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+      </div>
+
+      <h3 class="modal-title" id="cameraErrorTitle">Camera Access Needed</h3>
+      <p class="modal-desc" id="cameraErrorMessage">
+        PoseMate AI needs your camera permission to provide live pose coaching and take photos.
+      </p>
+
+      <div class="troubleshooting-steps">
+        <h4>How to enable camera access:</h4>
+        <ol>
+          <li>Look for the camera or lock icon in your browser's address bar.</li>
+          <li>Tap or click it, and change Camera permission to <strong>Allow</strong>.</li>
+          <li>Make sure you are using <strong>localhost</strong> or a secure <strong>HTTPS</strong> connection.</li>
+          <li>Ensure no other application (Zoom, Teams, FaceTime) is currently locking the camera.</li>
+        </ol>
+      </div>
+
+      <div class="modal-actions-row">
+        <button type="button" class="btn btn-secondary" id="cancelCameraErrorBtn">Cancel</button>
+        <button type="button" class="btn btn-primary" id="retryCameraBtn">Grant Access & Retry</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ======================================================== -->
+  <!-- MODAL 4: AI OUTFIT & SCENE ANALYSIS                      -->
+  <!-- ======================================================== -->
+  <div class="modal-overlay hidden" id="aiVisionModal" role="dialog" aria-modal="true" aria-labelledby="aiVisionTitle">
+    <div class="modal-card ai-vision-modal-card">
+      <div class="modal-header">
+        <div class="ai-header-group">
+          <div class="ai-spark-icon">✨</div>
+          <div>
+            <h3 class="modal-title" id="aiVisionTitle">AI Outfit & Scene Analysis</h3>
+            <p class="modal-desc" id="aiVisionSub">Analyzing clothing, background lighting, and framing</p>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" id="closeAiVisionModalBtn" aria-label="Close AI Analysis">&times;</button>
+      </div>
+
+      <!-- Analysis Status & Engine Indicator -->
+      <div class="ai-engine-banner" id="aiEngineBanner">
+        <span class="engine-indicator-dot"></span>
+        <span id="aiEngineLabel">Vision Analysis Engine</span>
+      </div>
+
+      <!-- Analysis Results Container -->
+      <div class="ai-results-body" id="aiResultsBody">
+        <!-- Live Loading spinner state -->
+        <div class="ai-loading-state" id="aiLoadingState">
+          <div class="ai-spinner"></div>
+          <p class="ai-loading-text">Analyzing your outfit lines, colors, and camera lighting...</p>
+        </div>
+
+        <!-- Analysis Data Presentation -->
+        <div class="ai-analysis-details hidden" id="aiAnalysisDetails">
+          
+          <div class="analysis-snapshot-row">
+            <div class="snapshot-thumb-wrap">
+              <img id="aiSnapshotThumb" alt="Scene Snapshot" src="" />
+            </div>
+            <div class="scene-tags-grid">
+              <div class="scene-tag-card">
+                <span class="scene-tag-label">Detected Fit</span>
+                <span class="scene-tag-value" id="aiDetectedOutfit">Casual Streetwear</span>
+              </div>
+              <div class="scene-tag-card">
+                <span class="scene-tag-label">Color Palette</span>
+                <span class="scene-tag-value" id="aiDetectedColors">Warm Neutrals & Denim</span>
+              </div>
+              <div class="scene-tag-card">
+                <span class="scene-tag-label">Lighting & Space</span>
+                <span class="scene-tag-value" id="aiDetectedEnvironment">Soft Ambient / Indoor</span>
+              </div>
+              <div class="scene-tag-card">
+                <span class="scene-tag-label">Framing</span>
+                <span class="scene-tag-value" id="aiDetectedFraming">Waist-Up Vertical</span>
+              </div>
+            </div>
+          </div>
+
+          <h4 class="ai-rec-heading">Tailored Pose Recommendations:</h4>
+          <div class="ai-recs-list" id="aiRecommendationsList">
+            <!-- Injected recommendation cards -->
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ======================================================== -->
+  <!-- MODAL 5: PREMIUM LOGIN & REGISTRATION MODAL              -->
+  <!-- ======================================================== -->
+  <div class="modal-overlay hidden" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+    <div class="modal-card auth-modal-card">
+      <div class="auth-split-wrapper">
+        
+        <!-- Left Column: Editorial Photography Studio Showcase -->
+        <div class="auth-showcase-column">
+          <div class="auth-showcase-overlay"></div>
+          <div class="auth-showcase-content">
+            <div class="brand-group">
+              <div class="brand-icon small">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                  <circle cx="12" cy="13" r="4"></circle>
+                </svg>
+              </div>
+              <span class="brand-title">PoseMate<span class="brand-accent">AI</span></span>
+            </div>
+            <div class="auth-quote-box">
+              <p class="auth-quote">"The camera sees what you feel. Let's make every posture effortless."</p>
+              <span class="auth-quote-author">— PoseMate AI Studio</span>
+            </div>
+            <ul class="auth-perks-list">
+              <li><span>✓</span> Save favorite poses across sessions</li>
+              <li><span>✓</span> Unlock high-resolution photo breakdowns</li>
+              <li><span>✓</span> On-device camera privacy guaranteed</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Right Column: Interactive Sign In / Sign Up Forms -->
+        <div class="auth-form-column">
+          <button type="button" class="modal-close-btn" id="closeAuthModalBtn" aria-label="Close Authentication">&times;</button>
+          
+          <div class="auth-form-header">
+            <h3 class="auth-title" id="authModalTitle">Welcome to PoseMate</h3>
+            <p class="auth-subtitle" id="authModalSubtitle">Sign in to your account or create a new profile</p>
+            
+            <div class="auth-tabs-toggle">
+              <button type="button" class="auth-tab-btn active" id="authTabSignInBtn">Sign In</button>
+              <button type="button" class="auth-tab-btn" id="authTabSignUpBtn">Create Account</button>
+            </div>
+          </div>
+
+          <!-- SIGN IN FORM -->
+          <form id="signInForm" class="auth-form active" novalidate>
+            <div class="form-group">
+              <label for="signInEmail" class="form-label">Email Address</label>
+              <div class="input-wrap">
+                <input type="email" id="signInEmail" class="form-input" placeholder="name@example.com" required autocomplete="email" />
+              </div>
+              <span class="input-error-msg" id="signInEmailError"></span>
+            </div>
+
+            <div class="form-group">
+              <div class="label-row">
+                <label for="signInPassword" class="form-label">Password</label>
+              </div>
+              <div class="input-wrap password-wrap">
+                <input type="password" id="signInPassword" class="form-input" placeholder="Enter your password" required autocomplete="current-password" />
+                <button type="button" class="toggle-password-btn" id="signInTogglePasswordBtn" aria-label="Show password">
+                  <svg class="eye-open-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                  <svg class="eye-closed-icon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                  </svg>
+                </button>
+              </div>
+              <span class="input-error-msg" id="signInPasswordError"></span>
+            </div>
+
+            <div class="form-options-row">
+              <label class="remember-label">
+                <input type="checkbox" id="signInRememberMe" checked />
+                <span>Remember me</span>
+              </label>
+              <button type="button" class="forgot-link-btn" id="forgotPasswordBtn">Forgot password?</button>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-large" id="signInSubmitBtn">
+              <span>Sign In to Studio</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+          </form>
+
+          <!-- SIGN UP / REGISTRATION FORM -->
+          <form id="signUpForm" class="auth-form hidden" novalidate>
+            <div class="form-group">
+              <label for="signUpName" class="form-label">Full Name</label>
+              <div class="input-wrap">
+                <input type="text" id="signUpName" class="form-input" placeholder="e.g. Alex Vance" required autocomplete="name" />
+              </div>
+              <span class="input-error-msg" id="signUpNameError"></span>
+            </div>
+
+            <div class="form-group">
+              <label for="signUpEmail" class="form-label">Email Address</label>
+              <div class="input-wrap">
+                <input type="email" id="signUpEmail" class="form-input" placeholder="name@example.com" required autocomplete="email" />
+              </div>
+              <span class="input-error-msg" id="signUpEmailError"></span>
+            </div>
+
+            <div class="form-group">
+              <label for="signUpPassword" class="form-label">Create Password</label>
+              <div class="input-wrap password-wrap">
+                <input type="password" id="signUpPassword" class="form-input" placeholder="Min. 6 characters" required autocomplete="new-password" />
+                <button type="button" class="toggle-password-btn" id="signUpTogglePasswordBtn" aria-label="Show password">
+                  <svg class="eye-open-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                  <svg class="eye-closed-icon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                  </svg>
+                </button>
+              </div>
+              <div class="password-strength-container">
+                <div class="strength-track">
+                  <div class="strength-fill" id="signUpStrengthBar"></div>
+                </div>
+                <span class="strength-label" id="signUpStrengthText">Password strength</span>
+              </div>
+              <span class="input-error-msg" id="signUpPasswordError"></span>
+            </div>
+
+            <div class="form-group">
+              <label for="signUpConfirmPassword" class="form-label">Confirm Password</label>
+              <div class="input-wrap password-wrap">
+                <input type="password" id="signUpConfirmPassword" class="form-input" placeholder="Confirm your password" required autocomplete="new-password" />
+                <button type="button" class="toggle-password-btn" id="signUpToggleConfirmPasswordBtn" aria-label="Show password">
+                  <svg class="eye-open-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                  <svg class="eye-closed-icon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                  </svg>
+                </button>
+              </div>
+              <span class="input-error-msg" id="signUpConfirmError"></span>
+            </div>
+
+            <div class="form-options-row">
+              <label class="terms-label">
+                <input type="checkbox" id="signUpTerms" checked />
+                <span>I agree to terms & on-device privacy guarantee</span>
+              </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-large" id="signUpSubmitBtn">
+              <span>Create Account</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+          </form>
+
+          <!-- Alternative Auth Options -->
+          <div class="auth-divider">
+            <span>or continue with</span>
+          </div>
+
+          <div class="alt-auth-buttons">
+            <!-- Google Login Button -->
+            <button type="button" class="btn-alt-auth" id="googleSignInBtn" title="Continue with Google">
+              <svg viewBox="0 0 24 24" class="google-icon">
+                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+                <path fill="#FBBC05" d="M5.28 14.27a7.22 7.22 0 0 1 0-4.54V6.58H1.25a11.98 11.98 0 0 0 0 10.84l4.03-3.15z"/>
+                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+              </svg>
+              <span>Continue with Google</span>
+            </button>
+
+            <!-- Instant Demo Member Login -->
+            <button type="button" class="btn-alt-auth demo-auth-btn" id="demoSignInBtn" title="Explore Studio as Demo User">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+              <span>Instant Demo Account</span>
+            </button>
+          </div>
+
+          <!-- Firebase Setup Explainer Trigger Link -->
+          <div class="firebase-info-link-wrap">
+            <button type="button" class="text-link-subtle" id="openFirebaseSetupBtn">
+              ⚙️ Need to configure Firebase Authentication? View Setup Guide
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ======================================================== -->
+  <!-- MODAL 6: FIREBASE SETUP & CONFIGURATION GUIDE MODAL      -->
+  <!-- ======================================================== -->
+  <div class="modal-overlay hidden" id="firebaseSetupModal" role="dialog" aria-modal="true" aria-labelledby="firebaseSetupTitle">
+    <div class="modal-card setup-modal-card">
+      <div class="modal-header">
+        <div class="ai-header-group">
+          <div class="ai-spark-icon">🔥</div>
+          <div>
+            <h3 class="modal-title" id="firebaseSetupTitle">Firebase Authentication Integration</h3>
+            <p class="modal-desc">Setup instructions for connecting production Firebase or Google OAuth</p>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" id="closeFirebaseSetupModalBtn" aria-label="Close Setup Guide">&times;</button>
+      </div>
+
+      <div class="setup-guide-body">
+        <div class="setup-callout-info">
+          <strong>Current Status:</strong> Secure client-side hashed authentication is currently active (using SHA-256 password hashing with zero plain-text storage). To connect Firebase Auth:
+        </div>
+
+        <ol class="setup-steps-list">
+          <li>
+            <strong>1. Create Firebase Project</strong>
+            <p>Visit the <a href="https://console.firebase.google.com" target="_blank" rel="noopener">Firebase Console</a>, create a project, and enable <strong>Authentication</strong> &rarr; <strong>Email/Password</strong> and <strong>Google Sign-in</strong> providers.</p>
+          </li>
+          <li>
+            <strong>2. Retrieve Web App Config</strong>
+            <p>In Project Settings &rarr; Your Apps &rarr; Web App, copy your config credentials.</p>
+          </li>
+          <li>
+            <strong>3. Add Firebase SDK to index.html</strong>
+            <pre class="code-snippet">&lt;script type="module"&gt;
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+  window.firebaseAuth = getAuth(initializeApp(firebaseConfig));
+&lt;/script&gt;</pre>
+          </li>
+          <li>
+            <strong>4. Automated Fallback</strong>
+            <p>PoseMate AI automatically detects if <code>window.firebaseAuth</code> is initialized. When detected, it transitions from the client SHA-256 engine to live Firebase tokens seamlessly!</p>
+          </li>
+        </ol>
+
+        <div class="modal-actions-row">
+          <button type="button" class="btn btn-primary" id="ackFirebaseSetupBtn">Got It, Thanks!</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ======================================================== -->
+  <!-- MODAL 7: POSE DETAIL & HIGH-RES BREAKDOWN MODAL          -->
+  <!-- ======================================================== -->
+  <div class="modal-overlay hidden" id="poseDetailModal" role="dialog" aria-modal="true" aria-labelledby="modalPoseTitle">
+    <div class="modal-card pose-detail-modal-card">
+      <div class="modal-header">
+        <div>
+          <span class="badge-pill badge-primary" id="modalPoseVibe">Effortless</span>
+          <h3 class="modal-title" id="modalPoseTitle">Natural Standing</h3>
+        </div>
+        <button type="button" class="modal-close-btn" id="closePoseDetailModalBtn" aria-label="Close Details">&times;</button>
+      </div>
+
+      <div class="pose-detail-content">
+        <!-- Dual Image Comparison Frame -->
+        <div class="detail-images-comparison">
+          <div class="detail-image-box">
+            <span class="detail-image-tag">Reference Pose</span>
+            <img id="modalPoseRefImg" src="" alt="Pose Reference Demonstration" />
+          </div>
+          <div class="detail-image-box">
+            <span class="detail-image-tag final">Final Photograph Result</span>
+            <img id="modalPoseFinalImg" src="" alt="Finished Editorial Photograph" />
+          </div>
+        </div>
+
+        <p class="detail-pose-desc" id="modalPoseDesc"></p>
+
+        <!-- Step-by-Step Anatomical Breakdown -->
+        <div class="detail-breakdown-grid">
+          <div class="detail-breakdown-card">
+            <strong>🧍 Body Position:</strong>
+            <p id="modalBodyPos"></p>
+          </div>
+          <div class="detail-breakdown-card">
+            <strong>✋ Hand Placement:</strong>
+            <p id="modalHandPos"></p>
+          </div>
+          <div class="detail-breakdown-card">
+            <strong>🦵 Leg & Stance:</strong>
+            <p id="modalLegPos"></p>
+          </div>
+          <div class="detail-breakdown-card">
+            <strong>👀 Face & Expression:</strong>
+            <p id="modalFacePos"></p>
+          </div>
+          <div class="detail-breakdown-card full-width">
+            <strong>📐 Recommended Camera Angle:</strong>
+            <p id="modalCameraAngle"></p>
+          </div>
+        </div>
+
+        <div class="modal-actions-row">
+          <button type="button" class="btn btn-secondary" id="modalToggleFavBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+            <span id="modalFavBtnText">Save to Favorites</span>
+          </button>
+          <button type="button" class="btn btn-primary glow-effect" id="modalLaunchPoseBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+              <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+            <span>Launch in Camera Coach</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Floating Toast Notifications Container -->
+  <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Hidden Canvas for Full Resolution Photo Capture -->
+  <canvas id="photoCaptureCanvas" class="hidden"></canvas>
+
+  <!-- Application Logic Scripts -->
+  <script src="poseData.js"></script>
+  <script src="poseDetector.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
